@@ -1,0 +1,16 @@
+<div class="slot-machine text-align: -webkit-center">
+  <h1 class="large-text">Saldo: {{ balance }} €</h1>
+  <div class="reels">
+    <div *ngFor="let reel of reels" class="reel">
+      <div *ngFor="let symbol of reel" class="large-symbol">{{ symbol }}</div>
+    </div>
+  </div>
+  <button (click)="spin()" [disabled]="isSpinning" class="large-button">Gira</button>
+  <p class="large-text">{{ result }}</p>
+  <div *ngIf="winningLines.length > 0">
+    <h2 class="large-text">Linee vincenti:</h2>
+    <ul>
+      <li *ngFor="let line of winningLines" class="large-text">{{ line }}</li>
+    </ul>
+  </div>
+</div>
