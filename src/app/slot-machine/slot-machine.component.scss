@@ -1,4 +1,4 @@
-/* Impostazioni generali per il layout */
+/* Layout principale */
 html, body {
   height: 100%;
   margin: 0;
@@ -9,72 +9,49 @@ html, body {
   background-color: #f4f4f4;
 }
 
-/* Slot machine container */
 .slot-machine {
-  text-align: center; /* Allinea il testo al centro */
-  width: 70%; /* Riduci la larghezza al 70% per renderla più compatta */
-  max-width: 1000px; /* Limita la larghezza massima */
-  height: 70%; /* Riduci l'altezza al 70% dello schermo */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  text-align: center;
+  width: 70%;
+  max-width: 1000px;
   padding: 20px;
-  box-sizing: border-box;
-  background-color: white; /* Opzionale: per dare un contrasto al contenuto */
-  border-radius: 15px; /* Opzionale: aggiungi bordi arrotondati */
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Opzionale: aggiungi un'ombra per l'effetto */
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Reels che occupano lo spazio orizzontale */
 .reels {
   display: flex;
   justify-content: center;
   margin: 20px 0;
-  width: 100%;
-  height: 50%; /* Riduci l'altezza dei rulli */
 }
 
-/* Ogni singolo reel */
 .reel {
   display: flex;
   flex-direction: column;
   margin: 0 5px;
-  width: 33%; /* Ogni reel occupa un terzo della larghezza */
-  height: 100%;
-  justify-content: center;
-  align-items: center;
 }
 
-/* Simboli leggermente più piccoli */
 .large-symbol {
-  font-size: 6rem; /* Riduci la dimensione dei simboli */
-  padding: 20px;
+  font-size: 6rem;
+  padding: 10px;
   border: 3px solid #ddd;
-  margin: 10px 0;
+  margin: 5px 0;
   text-align: center;
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-/* Simbolo evidenziato */
-.large-symbol.highlight {
-  background-color: yellow;
-  border: 4px solid gold;
-  font-weight: bold;
+.controls {
+  margin: 20px 0;
 }
 
-/* Bottone leggermente più piccolo */
 .large-button {
-  font-size: 2.5rem; /* Riduci la dimensione del testo del bottone */
-  padding: 25px 50px;
+  font-size: 2.5rem;
+  padding: 15px 40px;
   background-color: #4CAF50;
   color: white;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin: 10px;
 }
 
 .large-button:disabled {
@@ -82,19 +59,143 @@ html, body {
   cursor: not-allowed;
 }
 
-/* Testo grande per saldo, risultato e linee vincenti */
 .large-text {
-  font-size: 3.5rem; /* Riduci la dimensione del testo */
-  margin: 10px;
+  font-size: 3rem;
 }
 
-/* Lista delle linee vincenti */
 ul {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
 }
 
 li {
   font-size: 2.5rem;
-  margin: 5px 0;
+}
+
+/* Controllo della puntata in basso a destra */
+.bet-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.bet-label {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.bet-input {
+  font-size: 2rem;
+  padding: 5px;
+  width: 100px;
+  text-align: center;
+}
+
+/* Animazioni per il bonus */
+@keyframes bonusAnimation {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Stile per il messaggio del bonus */
+.bonus-info {
+  animation: bonusAnimation 1s ease-in-out;
+  background-color: #ffd700;
+  color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Effetto per il bottone bonus */
+.large-button[disabled] {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animazione per il risultato finale */
+@keyframes resultAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.large-text {
+  animation: resultAnimation 1s ease-in-out;
+}
+
+/* Animazione esplosione */
+@keyframes explosion {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Stile per l'esplosione del bonus */
+.bonus-explosion {
+  animation: explosion 1.5s ease-in-out forwards;
+  font-size: 4rem;
+  color: #ff0;
+  font-weight: bold;
+  margin-top: 20px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Correzione per animazioni "explosion" che potrebbero essere visibili solo al momento dell'attivazione del bonus */
+.bonus-info .bonus-explosion {
+  display: none;
+}
+
+.bonus-info.active .bonus-explosion {
+  display: block;
+  animation: explosion 1.5s ease-in-out forwards;
 }

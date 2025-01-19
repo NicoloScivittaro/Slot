@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-type SlotSymbol = '🍒' | '🍋' | '🍊' | '🍉' | '🔔' | '⭐';
+type SlotSymbol = '🍒' | '🍋' | '🍊' | '🍉' | '🔔' | '⭐' | '🌟' | '🎰'; // 🌟 = Wild, 🎰 = Jolly
 
 @Component({
   selector: 'app-slot-machine',
@@ -8,82 +8,49 @@ type SlotSymbol = '🍒' | '🍋' | '🍊' | '🍉' | '🔔' | '⭐';
   styleUrls: ['./slot-machine.component.scss']
 })
 export class SlotMachineComponent {
-  symbols: SlotSymbol[] = ['🍒', '🍒', '🍒', '🍋', '🍋', '🍊', '🍊', '🍉', '🔔', '⭐']; // Distribuzione ponderata
-  reels = Array(5).fill([]).map(() => Array(3).fill('')); // 5 rulli, 3 simboli ciascuno
-  balance = 1000; // Saldo iniziale
-  isSpinning = false;
-  result = '';
-  winningLines: string[] = [];
-
-  // Tabella dei pagamenti per linee specifiche
-  linePayments: { [key in SlotSymbol]: number } = {
-    '🍒': 5,
-    '🍋': 10,
-    '🍊': 15,
-    '🍉': 20,
-    '🔔': 50,
-    '⭐': 100
-  };
-
-  // Linee di pagamento (coordinate dei simboli sui rulli)
-  payLines: number[][] = [
-    // Linee orizzontali
-    [0, 0, 0, 0, 0], // Orizzontale superiore
-    [1, 1, 1, 1, 1], // Orizzontale centrale
-    [2, 2, 2, 2, 2], // Orizzontale inferiore
-
-    // Diagonali
-    [0, 1, 2, 1, 0], // Zig-zag 1
-    [2, 1, 0, 1, 2], // Zig-zag 2
-    [0, 0, 1, 2, 2], // Diagonale da sinistra a destra
-    [2, 2, 1, 0, 0], // Diagonale da destra a sinistra
-
-    // Linee a V
-    [0, 1, 0, 1, 0], // V alta
-    [2, 1, 2, 1, 2], // V bassa
-
-    // Linee a piramide
-    [0, 1, 2, 1, 0], // Piramide completa
-    [2, 1, 0, 1, 2], // Piramide inversa
-
-    // Linee a scaletta
-    [0, 0, 1, 2, 2], // Scala ascendente
-    [2, 2, 1, 0, 0], // Scala discendente
-
-    // Linee a zig-zag stretto
-    [0, 1, 0, 1, 0], // Zig-zag alto
-    [2, 1, 2, 1, 2], // Zig-zag basso
-
-    // Linee miste
-    [1, 0, 1, 2, 1], // Centrale a onda
-    [1, 2, 1, 0, 1], // Centrale a onda inversa
-    [0, 2, 1, 0, 2], // Diagonale alternata
-    [2, 0, 1, 2, 0], // Diagonale alternata inversa
-
-    // Linee a zig-zag ampio
-    [0, 2, 0, 2, 0], // Zig-zag ampio alto
-    [2, 0, 2, 0, 2], // Zig-zag ampio basso
-
-    // Linee combinate
-    [0, 1, 1, 1, 0], // A cornice alta
-    [2, 1, 1, 1, 2], // A cornice bassa
-    [1, 0, 0, 0, 1], // Cornice inversa alta
-    [1, 2, 2, 2, 1]  // Cornice inversa bassa
+  symbols: SlotSymbol[] = [
+    '🍒', '🍒', '🍒', '🍋', '🍋', '🍊', '🍊', '🍉',
+    '🔔', '⭐', '🌟', '🌟', // Wild più frequente
+    '🎰' // Wild più frequente
   ];
 
-  // Metodo per far girare i rulli
-  spin() {
-    if (this.isSpinning) return;
+  reels: SlotSymbol[][] = Array(5).fill([]).map(() => Array(3).fill('')); // 5 rulli, 3 simboli ciascuno
+  balance: number = 10; // Saldo iniziale
+  betAmount: number = 1; // Puntata iniziale
+  isSpinning: boolean = false;
+  result: string = '';
+  winningLines: string[] = [];
+  isBonusActive: boolean = false;
+  remainingBonusSpins: number = 0;
+  bonusMultiplier: number = 1;
 
-    if (this.balance <= 0) {
-      this.result = 'Saldo insufficiente!';
+  linePayments: { [key in SlotSymbol]: number } = {
+    '🍒': 1,
+    '🍋': 2,
+    '🍊': 3,
+    '🍉': 4,
+    '🔔': 5,
+    '⭐': 10,
+    '🌟': 0, // Wild non paga da solo
+    '🎰': 15
+  };
+
+  payLines: number[][] = [
+    [0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [2, 2, 2, 2, 2], // Orizzontali
+    [0, 1, 2, 1, 0], [2, 1, 0, 1, 2], // Zig-zag
+    [0, 0, 1, 2, 2], [2, 2, 1, 0, 0]  // Diagonali
+  ];
+
+  spin() {
+    if (this.isSpinning || this.balance < this.betAmount) {
+      this.result = this.balance < this.betAmount ? 'Saldo insufficiente!' : '';
       return;
     }
 
     this.isSpinning = true;
     this.result = '';
     this.winningLines = [];
-    this.balance -= 1; // Costo dello spin
+    this.balance -= this.betAmount; // Scala la puntata dal saldo
 
     let spins = 0;
     const spinInterval = setInterval(() => {
@@ -103,62 +70,121 @@ export class SlotMachineComponent {
     }, 100);
   }
 
-  // Ottieni un simbolo casuale in base alla distribuzione ponderata
   getRandomSymbol(): SlotSymbol {
-    const index = Math.floor(Math.random() * this.symbols.length);
-    return this.symbols[index];
+    return this.symbols[Math.floor(Math.random() * this.symbols.length)];
   }
 
-  // Controlla le linee vincenti
-  // Metodo aggiornato per controllare il risultato
   checkResult() {
-    console.log('Simboli sui rulli:', this.reels);
+    let hasWin = false;
 
-    this.payLines.forEach((line, index) => {
+    // Controllo delle linee di pagamento
+    this.payLines.forEach((line) => {
       const symbolsInLine = line.map((row, col) => this.reels[col][row]);
-      console.log(`Linea ${index + 1}:`, symbolsInLine);
-
-      // Conta i simboli consecutivi uguali
-      let currentSymbol = symbolsInLine[0];
+      const currentSymbol = symbolsInLine[0];
       let count = 1;
 
       for (let i = 1; i < symbolsInLine.length; i++) {
-        if (symbolsInLine[i] === currentSymbol) {
+        if (symbolsInLine[i] === currentSymbol || symbolsInLine[i] === '🌟') {
           count++;
-          if (count >= 3) { // Linea vincente con almeno 3 simboli uguali
-            this.addWinningLine(`Linea ${index + 1} con ${count} ${currentSymbol}`, currentSymbol);
-            break; // Una volta trovata una vincita, interrompi
-          }
         } else {
-          currentSymbol = symbolsInLine[i];
-          count = 1;
+          break;
         }
+      }
+
+      if (count >= 3) {
+        const multiplier = count === 3 ? 1 : count === 4 ? 2 : 3;
+        this.addWinningLine(`Linea vincente con ${currentSymbol}`, currentSymbol as SlotSymbol, multiplier);
+        hasWin = true;
       }
     });
 
-    this.result = this.winningLines.length > 0 ? 'Hai vinto!' : 'Prova ancora!';
+    // Controllo per 3 o più 🎰 in qualsiasi posizione
+    const allSymbols = this.reels.flat(); // Crea un array unico con tutti i simboli della griglia
+    const jokerCount = allSymbols.filter((symbol) => symbol === '🎰').length;
+
+    if (jokerCount >= 3) {
+      this.activateBonus(); // Avvia il bonus
+      this.result = `🎰 BONUS ATTIVATO! Hai trovato ${jokerCount} simboli Jolly!`;
+      hasWin = true;
+    }
+
+    if (!hasWin) {
+      this.result = '😢 Nessuna vincita. Riprova!';
+    }
   }
 
 
-// Metodo aggiornato per aggiungere una linea vincente
-addWinningLine(line: string, symbol: SlotSymbol) {
-  const basePayment = this.linePayments[symbol] || 0;
-  const totalPayment = basePayment * 3; // Moltiplica il pagamento base per 3 (o più se necessario)
+  addWinningLine(description: string, symbol: SlotSymbol, multiplier: number) {
+    const winnings = this.linePayments[symbol] * multiplier * this.betAmount;
+    this.winningLines.push(`${description} - Vincite: ${winnings}€`);
+    this.balance += winnings;
+  }
 
-  console.log(`Linea vincente trovata: ${line} con simbolo ${symbol}, paga ${totalPayment}€`);
-  this.balance += totalPayment;
-  this.winningLines.push(`${line} paga ${totalPayment}€`);
-}
+  activateBonus() {
+    this.remainingBonusSpins = 10;
+    this.bonusMultiplier = Math.floor(Math.random() * (10 - 2 + 1)) + 2;
+    this.isBonusActive = true;
+    console.log(`🎉 Bonus attivato! Giri gratuiti: ${this.remainingBonusSpins}, Moltiplicatore: x${this.bonusMultiplier}`);
+  }
 
+  spinBonus() {
+    if (this.remainingBonusSpins <= 0) {
+      this.isBonusActive = false;
+      console.log('🎉 Bonus terminato!');
+      return;
+    }
 
+    this.spinReels();
+    const winnings = this.calculateFreeSpinWinnings() * this.bonusMultiplier;
+    this.balance += winnings;
 
-// Metodo di debug per visualizzare lo stato dei rulli
-logReelsState() {
-  console.log('Stato dei rulli:');
-  this.reels.forEach((reel, index) => {
-    console.log(`Rullo ${index + 1}: ${reel.join(' | ')}`);
-  });
-}
+    console.log(`🎰 Giro bonus completato. Vincite: ${winnings}€`);
+    this.remainingBonusSpins--;
 
+    if (this.remainingBonusSpins === 0) {
+      this.isBonusActive = false;
+      this.result = `🎉 Bonus completato!`;
+    }
+  }
 
+  spinReels() {
+    for (let i = 0; i < 5; i++) {
+      this.reels[i] = [
+        this.getRandomSymbol(),
+        this.getRandomSymbol(),
+        this.getRandomSymbol()
+      ];
+    }
+    this.logReelsState();
+  }
+
+  calculateFreeSpinWinnings(): number {
+    let totalWinnings = 0;
+    this.payLines.forEach((line) => {
+      const symbolsInLine = line.map((row, col) => this.reels[col][row]);
+      const currentSymbol = symbolsInLine[0];
+      let count = 1;
+
+      for (let i = 1; i < symbolsInLine.length; i++) {
+        if (symbolsInLine[i] === currentSymbol || symbolsInLine[i] === '🌟') {
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      if (count >= 3) {
+        const multiplier = count === 3 ? 1 : count === 4 ? 2 : 3;
+        totalWinnings += this.linePayments[currentSymbol as SlotSymbol] * multiplier;
+      }
+    });
+    return totalWinnings;
+  }
+
+  logReelsState() {
+    console.log('Stato dei rulli:');
+    this.reels.forEach((reel, index) => {
+      console.log(`Rullo ${index + 1}: ${reel.join(' | ')}`);
+    });
+  }
 }

@@ -1,16 +1,64 @@
-<div class="slot-machine text-align: -webkit-center">
+<div class="slot-machine">
   <h1 class="large-text">Saldo: {{ balance }} €</h1>
+
+  <!-- Rulli -->
   <div class="reels">
     <div *ngFor="let reel of reels" class="reel">
       <div *ngFor="let symbol of reel" class="large-symbol">{{ symbol }}</div>
     </div>
   </div>
-  <button (click)="spin()" [disabled]="isSpinning" class="large-button">Gira</button>
+
+  <!-- Pulsanti per girare -->
+  <div class="controls">
+    <button
+      (click)="spin()"
+      [disabled]="isSpinning || isBonusActive || balance < betAmount"
+      class="large-button"
+    >
+      Gira
+    </button>
+    <button
+      (click)="spinBonus()"
+      *ngIf="isBonusActive"
+      class="large-button"
+    >
+      Avvia Giro Bonus
+    </button>
+  </div>
+
+<!-- Bonus attivo -->
+<div *ngIf="isBonusActive" class="bonus-info active">
+  <p class="large-text">Moltiplicatore Bonus: x{{ bonusMultiplier }}</p>
+  <p class="large-text">Giri Rimanenti: {{ remainingBonusSpins }}</p>
+  <!-- Animazione esplosiva per il bonus -->
+  <div class="bonus-explosion" *ngIf="isBonusActive">
+    🎉💥 BONUS ATTIVATO 💥🎉
+  </div>
+</div>
+
+
+  <!-- Risultato -->
   <p class="large-text">{{ result }}</p>
+
+  <!-- Linee vincenti -->
   <div *ngIf="winningLines.length > 0">
     <h2 class="large-text">Linee vincenti:</h2>
     <ul>
       <li *ngFor="let line of winningLines" class="large-text">{{ line }}</li>
     </ul>
+  </div>
+
+  <!-- Controllo della puntata in basso a destra -->
+  <div class="bet-controls">
+    <label for="betAmount" class="bet-label">Puntata:</label>
+    <input
+      type="number"
+      id="betAmount"
+      min="1"
+      max="20"
+      [(ngModel)]="betAmount"
+      [disabled]="isSpinning || isBonusActive"
+      class="bet-input"
+    />
   </div>
 </div>
