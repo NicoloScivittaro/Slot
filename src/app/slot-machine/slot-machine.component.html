@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <!-- Pulsanti per girare -->
+  <!-- Pulsanti per girare e Auto Spin -->
   <div class="controls">
     <button
       (click)="spin()"
@@ -24,18 +24,36 @@
     >
       Avvia Giro Bonus
     </button>
+
+    <!-- Controlli Auto Spin -->
+    <div class="auto-spin">
+      <label for="autoSpinCount" class="auto-spin-label">Auto Spin:</label>
+      <select
+        id="autoSpinCount"
+        [(ngModel)]="autoSpinCount"
+        [disabled]="isSpinning || isBonusActive || isAutoSpinning"
+        class="auto-spin-select"
+      >
+        <option *ngFor="let count of [5, 10, 20, 50, 100]" [value]="count">{{ count }}</option>
+      </select>
+      <button
+        (click)="startAutoSpin()"
+        [disabled]="isSpinning || isBonusActive || isAutoSpinning || balance < betAmount"
+        class="large-button auto-spin-button"
+      >
+        Avvia
+      </button>
+    </div>
   </div>
 
-<!-- Bonus attivo -->
-<div *ngIf="isBonusActive" class="bonus-info active">
-  <p class="large-text">Moltiplicatore Bonus: x{{ bonusMultiplier }}</p>
-  <p class="large-text">Giri Rimanenti: {{ remainingBonusSpins }}</p>
-  <!-- Animazione esplosiva per il bonus -->
-  <div class="bonus-explosion" *ngIf="isBonusActive">
-    🎉💥 BONUS ATTIVATO 💥🎉
+  <!-- Bonus attivo -->
+  <div *ngIf="isBonusActive" class="bonus-info active">
+    <p class="large-text">Moltiplicatore Bonus: x{{ bonusMultiplier }}</p>
+    <p class="large-text">Giri Rimanenti: {{ remainingBonusSpins }}</p>
+    <div class="bonus-explosion" *ngIf="isBonusActive">
+      🎉💥 BONUS ATTIVATO 💥🎉
+    </div>
   </div>
-</div>
-
 
   <!-- Risultato -->
   <p class="large-text">{{ result }}</p>
@@ -48,7 +66,7 @@
     </ul>
   </div>
 
-  <!-- Controllo della puntata in basso a destra -->
+  <!-- Controllo della puntata -->
   <div class="bet-controls">
     <label for="betAmount" class="bet-label">Puntata:</label>
     <input
